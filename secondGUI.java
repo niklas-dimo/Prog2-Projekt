@@ -340,6 +340,7 @@ public class secondGUI extends JFrame {
 				txtEnterRecipeName.setText("");
 				txtEnterIngredientName.setText("");
 				txtEnterIngredientAmount.setText("");
+				table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
 				
 			}
 		});
@@ -474,7 +475,6 @@ public class secondGUI extends JFrame {
 					
 					model.setValueAt(recipename, table.getSelectedRow(), 0);
 					txtEnterRecipeName.setText("Enter recipe name");
-					table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
 				}
 				
 				
