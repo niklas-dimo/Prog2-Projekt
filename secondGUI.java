@@ -1,5 +1,5 @@
 package secondGUI;
-/*hello*/
+
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -474,7 +474,9 @@ public class secondGUI extends JFrame {
 					
 					model.setValueAt(recipename, table.getSelectedRow(), 0);
 					txtEnterRecipeName.setText("Enter recipe name");
+					table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
 				}
+				
 				
 			}
 		});
