@@ -473,11 +473,14 @@ public class secondGUI extends JFrame {
 				if(table.getSelectedRowCount() == 1) {
 					String recipename = txtEnterRecipeName.getText();
 					
-					model.setValueAt(recipename, table.getSelectedRow(), 0);
-					txtEnterRecipeName.setText("Enter recipe name");
+					model.setValueAt(recipename, table.getSelectedRow(), 0);					
 				}
 				
+				File file = new File(oldrecipename);				
+				File newfile = new File(txtEnterRecipeName.getText() + ".txt");				
+				file.renameTo(newfile);
 				
+				txtEnterRecipeName.setText("Enter recipe name");				
 			}
 		});
 		
