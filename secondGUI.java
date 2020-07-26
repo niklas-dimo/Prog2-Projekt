@@ -1,6 +1,5 @@
 package secondGUI;
 
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
@@ -112,6 +111,7 @@ public class secondGUI extends JFrame {
 				int column = 0;
 				int row = table.getSelectedRow();
 				String nameForLoad = table.getModel().getValueAt(row, column).toString() + ".txt";
+				
 				
 		        try	(Reader myReader = new BufferedReader(new FileReader(nameForLoad))) {
 		        		txtrWriteRecipeHere.read(myReader, null);
@@ -340,7 +340,7 @@ public class secondGUI extends JFrame {
 				txtEnterRecipeName.setText("");
 				txtEnterIngredientName.setText("");
 				txtEnterIngredientAmount.setText("");
-				table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
+				table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));	
 				
 			}
 		});
@@ -470,17 +470,36 @@ public class secondGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				String oldrecipename = model.getValueAt(table.getSelectedRow(), 0).toString() + ".txt";
+				
 				if(table.getSelectedRowCount() == 1) {
 					String recipename = txtEnterRecipeName.getText();
 					
 					model.setValueAt(recipename, table.getSelectedRow(), 0);					
 				}
 				
+				
 				File file = new File(oldrecipename);				
 				File newfile = new File(txtEnterRecipeName.getText() + ".txt");				
 				file.renameTo(newfile);
 				
-				txtEnterRecipeName.setText("Enter recipe name");				
+				try {
+					
+					String recipeText = txtrWriteRecipeHere.getText();
+					
+					FileWriter fw = new FileWriter(newfile);
+					BufferedWriter bw = new BufferedWriter(fw);
+					bw.write(recipeText);
+					bw.close();
+					fw.close();
+			
+				} catch (IOException e) {
+					
+					e.printStackTrace();
+				}
+							
+				txtEnterRecipeName.setText("Enter recipe name");
+				txtrWriteRecipeHere.setText("Write Recipe Here");
 			}
 		});
 		
