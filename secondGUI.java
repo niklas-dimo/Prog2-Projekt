@@ -479,8 +479,10 @@ public class secondGUI extends JFrame {
 				}
 				
 				
-				File file = new File(oldrecipename);				
-				File newfile = new File(txtEnterRecipeName.getText() + ".txt");				
+				File file = new File(oldrecipename);
+				
+				String newname = txtEnterRecipeName.getText() + ".txt";
+				File newfile = new File(newname);				
 				file.renameTo(newfile);
 				
 				try {
@@ -497,9 +499,19 @@ public class secondGUI extends JFrame {
 					
 					e.printStackTrace();
 				}
+				
+				String oldingredientsname = model.getValueAt(table.getSelectedRow(), 0).toString() + "Zutaten.txt";
+				
+				File folder = new File("src/Zutaten");				
+				File file3 = new File(folder, oldingredientsname);
+				String ztt = txtEnterRecipeName.getText() + "Zutaten.txt";				
+				File newzt = new File(folder, ztt);
+				file3.renameTo(newzt);
+				
 							
 				txtEnterRecipeName.setText("Enter recipe name");
 				txtrWriteRecipeHere.setText("Write Recipe Here");
+				table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
 			}
 		});
 		
