@@ -44,14 +44,23 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
 
+
+//Nach rezeptnamen suchen
 class RowFilterUtil {
     public static JTextField createRowFilter(JTable table) {
         RowSorter<? extends TableModel> rs = table.getRowSorter();
@@ -112,7 +121,6 @@ public class secondGUI extends JFrame{
 				try {
 					secondGUI frame = new secondGUI();
 					recipeListUpdate();
-					JOptionPane.showMessageDialog(null, "1. add shit \n 2. add more shit \n 3. add even more shit", "Instructions", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -153,6 +161,7 @@ public class secondGUI extends JFrame{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
+				//beim klicken des rezeptnamens werden allle gespeicherten daten aufgerufen
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				String tbl = model.getValueAt(table.getSelectedRow(), 0).toString();
 				
@@ -166,24 +175,27 @@ public class secondGUI extends JFrame{
 				int row = table.getSelectedRow();
 				String nameForLoad = table.getModel().getValueAt(row, column).toString() + ".txt";
 				
-				
-		        try	(Reader myReader = new BufferedReader(new FileReader(nameForLoad))) {
+				//Der Freitext wird aus der Datei gelesen und im Freitextfeld eingefügt
+		        try	(
+		        		Reader myReader = new BufferedReader(new FileReader(nameForLoad))) {
 		        		txtrWriteRecipeHere.read(myReader, null);
 		        	}
+		        
 		        catch(FileNotFoundException e1) {
-		        	System.out.println("Keine Zutaten angelegt");
+		        	JOptionPane.showMessageDialog(null, "no ingredients were created");
 		        }
+		        
 		        catch(IOException e2) {
 		        	e2.printStackTrace();	
 		        }
 				
 				File folder = new File("src/Zutaten");
-				
-				
+							
 				String ztt = txtEnterRecipeName.getText() + "Zutaten.txt";
 				
-
+				//Die Datei mit den Zutaten wird aufgerufen und in die Tabelle eingefügt
 				try {
+					
 					File file4 = new File(folder, ztt);
 					FileReader fr2 = new FileReader(file4);
 					BufferedReader br = new BufferedReader(fr2);
@@ -195,10 +207,19 @@ public class secondGUI extends JFrame{
 						String[] row2 = lines[i].toString().split(" ");
 						model4.addRow(row2);
 					}
+					fr2.close();
+					br.close();
+					
 				} 
 				catch (FileNotFoundException e1) {
-					System.out.println("Keine Zutaten angelegt");
+					JOptionPane.showMessageDialog(null, "no ingredients were created");
+				} catch (IOException e1) {
+					
+					e1.printStackTrace();
 				}
+				
+				txtEnterIngredientName.setText("Enter Ingredient name");
+				txtEnterIngredientAmount.setText("Enter Ingredient amount");
 				
 				
 				}
@@ -283,10 +304,12 @@ public class secondGUI extends JFrame{
 
 				String recipeText = txtrWriteRecipeHere.getText();
 				
+				
 				File file = new File(txtEnterRecipeName.getText() + ".txt");
 		        file.setWritable(true);
 		        file.setReadable(true);
 				
+		        //Der Freitext wird in eine Datei gespeichert, falls es eine Datei mit dem Rezeptnamen nicht schon gibt
 		        if(file.exists() == false) {
 			    FileWriter fw = new FileWriter(file);
 			    System.out.println(file.getAbsoluteFile());
@@ -295,6 +318,7 @@ public class secondGUI extends JFrame{
 			    fw.write(recipeFullText);
 			    fw.close();
 			    
+			    //Rezeptname wird in die Tabelle eingefügt
 	    		DefaultTableModel model = (DefaultTableModel) table.getModel();
 				model.addRow(new Object[] {txtEnterRecipeName.getText()});
 				
@@ -304,7 +328,7 @@ public class secondGUI extends JFrame{
 		        else {
 		        	JOptionPane.showMessageDialog(null, "Recipe with this name already exists");
 		        }
-				} 
+				}
 			    catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -358,8 +382,14 @@ public class secondGUI extends JFrame{
 				int row = table.getSelectedRow();
 				String nameForDelete = table.getModel().getValueAt(row, column).toString() + ".txt";
 				
+				File folder = new File("src/Zutaten");
+				String zt = table.getModel().getValueAt(row, column).toString() + "Zutaten.txt";
+				File file5 = new File(folder, zt);
+				
+				//Die gespeicherten daten werden gelöscht
 		        try {
 		            Files.deleteIfExists(Paths.get(nameForDelete));
+		            file5.delete();
 		            JOptionPane.showMessageDialog(null, "Recipe successfully deleted");
 		        } 
 		        catch(NoSuchFileException e) 
@@ -395,6 +425,7 @@ public class secondGUI extends JFrame{
 		btnNewButton_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
+				//Jedes Eingabefeld wird zurückgesetzt
 				txtrWriteRecipeHere.setText("");
 				txtEnterRecipeName.setText("");
 				txtEnterIngredientName.setText("");
@@ -413,7 +444,7 @@ public class secondGUI extends JFrame{
 		
 		
 		
-		JFrame secondFrame = new JFrame("2nd Window");
+		JFrame secondFrame = new JFrame("Distribution");
 		secondFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		secondFrame.setBounds(320, 180, 900, 480);
 		secondFrame.setLocationRelativeTo(panel);	
@@ -427,46 +458,123 @@ public class secondGUI extends JFrame{
 		
 		JButton btnNewButton_3 = new JButton("Show distribution");
 		btnNewButton_3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				double[] values = new double[3];
-			    String[] names = new String[3];
-			    values[0] = 1;
-			    names[0] = "Item 1";
+			private BufferedReader br;
 
-			    values[1] = 2;
-			    names[1] = "Item 2";
+			public void actionPerformed(ActionEvent e){
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				try {
 
-			    values[2] = 4;
-			    names[2] = "Item 3";
+		        File dir = new File("src/Zutaten"); 
 
-			    secondFrame.getContentPane().add(new ChartPanel(values, names, "title"));
+		        PrintWriter pw = new PrintWriter("src/output.txt"); 
+		  
+		        String[] fileNames = dir.list(); 
+		  
+		        for (String fileName : fileNames) { 
 
+		            File f = new File(dir, fileName); 
+		  
+		            br = new BufferedReader(new FileReader(f)); 
+
+		            String line = br.readLine(); 
+		            while (line != null) { 
+		            	
+		            	String value = line;
+		            	String words1 = firstWords(value, 1);
+		                pw.println(words1); 
+		                line = br.readLine(); 
+		            } 
+		            pw.flush(); 
+		            
+		        } 
+		        pw.close();
+		        Map<String, Long> dupes = Files.lines(Paths.get("src/output.txt"))
+		                .collect(Collectors.groupingBy(Function.identity(), 
+		                     Collectors.counting()));
+		        dupes.forEach((k, v)-> System.out.printf("(%d) times : %s ....%n", 
+		             v, k.substring(0,  Math.min(50, k.length()))));
+		        
+		        
+		        
+
+		        //Map<String, Integer> unSortedMap = 
+		         
+		        System.out.println("Unsorted Map : " + dupes);
+		         
+		        //LinkedHashMap preserve the ordering of elements in which they are inserted
+		        LinkedHashMap<String, Long> reverseSortedMap = new LinkedHashMap<>();
+		         
+		        //Use Comparator.reverseOrder() for reverse ordering
+		        dupes.entrySet()
+		            .stream()
+		            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 
+		            .forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
+		         
+		        System.out.println("Reverse Sorted Map   : " + reverseSortedMap);
+		        
+		        
+		        
+		        
+				}
+				catch (IOException x) {
+					System.out.println("x");
+				}
+	
+				
+				
+				
+				
+
+				
+				// for i = 0 < ...
+				Double[] arr = {13.0}; 
+				
+				Arrays.sort(arr, Collections.reverseOrder());
+				
+				
+				
+				double[] values = new double[5];
+			    String[] names = new String[5];
+			    values[0] = arr[0]; // count of max
+			    names[0] = "Item 1"; // names [0] = max count
+
+			    values[1] = (double) 2; // count of second most
+			    names[1] = "Item 2"; // names [1] = second most count
+
+			    values[2] = 4.0; // ...
+			    names[2] = "Item 3"; // ...
+			    
+			    values [3] = 2.0;
+			    names[3] = "Ite";
+			    
+			    values [4] = 1.0;
+			    names[4] = "itms";
+
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    
+			    secondFrame.getContentPane().add(new ChartPanel(values, names, "Ingredients mostly used"));
 				secondFrame.setVisible(true);
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+
 			}
 		});
 		panel_main_ingredients_diagram.add(btnNewButton_3, "name_39671767661000");
@@ -480,9 +588,11 @@ public class secondGUI extends JFrame{
 		btnNewButton_4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {	
 				
+				//Zutaten werden in einer Tabelle eingefügt
 				DefaultTableModel model2 = (DefaultTableModel) table_1.getModel();
 				model2.addRow(new Object[] {txtEnterIngredientName.getText(), txtEnterIngredientAmount.getText(), comboBox.getSelectedItem() });				
 				
+				//Verzeichnis Zutaten wird erstellt
 				File folder = new File("src/Zutaten");
 				folder.mkdir();
 				
@@ -490,7 +600,7 @@ public class secondGUI extends JFrame{
 				
 				File file3 = new File(folder, zt);
 
-				
+				//Die Zutaten werden im Verzeichnis Zutaten, in einer Datei gespeichert
 				try {
 										
 					FileWriter fw = new FileWriter(file3);
@@ -559,9 +669,11 @@ public class secondGUI extends JFrame{
 		btnNewButton_5.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
+				
 				DefaultTableModel model2 = (DefaultTableModel) table_1.getModel();
 				int rowindex2 = table_1.getSelectedRow();
 				
+				//Die Zutaten werden aus der Tabelle entfernt
 				if(table_1.getSelectedRow() != -1) {
 				model2.removeRow(rowindex2);
 				
@@ -574,7 +686,7 @@ public class secondGUI extends JFrame{
 				String zt = txtEnterRecipeName.getText() + "Zutaten.txt";				
 				File file3 = new File(folder, zt);
 
-				
+				//Die Datei mit den Zutaten wird nun umgeschrieben mit den neuen Zutaten
 				try {
 					FileWriter fw = new FileWriter(file3);
 					BufferedWriter bw = new BufferedWriter(fw);
@@ -613,24 +725,35 @@ public class secondGUI extends JFrame{
 				
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				String oldrecipename = model.getValueAt(table.getSelectedRow(), 0).toString() + ".txt";
+				String oldingredientsname = model.getValueAt(table.getSelectedRow(), 0).toString() + "Zutaten.txt";
 				
+				//Der neue Rezeptname wird in der tabelle umgechrieben
 				if(table.getSelectedRowCount() == 1) {
 					String recipename = txtEnterRecipeName.getText();
 					
 					model.setValueAt(recipename, table.getSelectedRow(), 0);					
 				}
 				
-				
+				//Die Datei mit dem Rezeptnamen wird geändert
 				File file = new File(oldrecipename);
 				
 				String newname = txtEnterRecipeName.getText() + ".txt";
-				File newfile = new File(newname);				
+				File newfile = new File(newname);			
 				file.renameTo(newfile);
 				
+				
+				//Die Datei mit dem Zutaten wird geändert
+				File folder = new File("src/Zutaten");				
+				File file3 = new File(folder, oldingredientsname);
+				String ztt = txtEnterRecipeName.getText() + "Zutaten.txt";		
+				File newzt = new File(folder, ztt);
+				file3.renameTo(newzt);
+				
+				//Der Freitext wird geändert
 				try {
 					
 					String recipeText = txtrWriteRecipeHere.getText();
-					
+									
 					FileWriter fw = new FileWriter(newfile);
 					BufferedWriter bw = new BufferedWriter(fw);
 					bw.write(recipeText);
@@ -642,17 +765,13 @@ public class secondGUI extends JFrame{
 					e.printStackTrace();
 				}
 				
-				String oldingredientsname = model.getValueAt(table.getSelectedRow(), 0).toString() + "Zutaten.txt";
-				
-				File folder = new File("src/Zutaten");				
-				File file3 = new File(folder, oldingredientsname);
-				String ztt = txtEnterRecipeName.getText() + "Zutaten.txt";				
-				File newzt = new File(folder, ztt);
-				file3.renameTo(newzt);
+
 				
 							
 				txtEnterRecipeName.setText("Enter recipe name");
 				txtrWriteRecipeHere.setText("Write Recipe Here");
+				txtEnterIngredientName.setText("Enter Ingredient name");
+				txtEnterIngredientAmount.setText("Enter Ingredient amount");
 				table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
 			}
 		});
@@ -660,6 +779,9 @@ public class secondGUI extends JFrame{
 		panel_change.add(btnChangeInputs, "name_178572106133400");
 	}
 		
+	
+		//Methode um die gespeicherten Rezeptnamen beim Start des Programms aufzurufen
+		//Wird in der Main Methode aufgerufen
 		public static void recipeListUpdate() {
 				Path currentRelativePath = Paths.get("");
 				String s = currentRelativePath.toAbsolutePath().toString();
@@ -678,7 +800,7 @@ public class secondGUI extends JFrame{
 			  String textFilesList[] = directoryPath.list(textFilefilter);
 		      DefaultTableModel model3 = (DefaultTableModel) table.getModel(); 
 		      for(String fileNameWithExtention : textFilesList) {
-		         System.out.println(fileNameWithExtention);
+		         //System.out.println(fileNameWithExtention);
 		         int pos = fileNameWithExtention.lastIndexOf(".");
 		         if (pos > 0 && pos < (fileNameWithExtention.length() - 1)) { // If '.' is not the first or last character.
 		             String fileName = fileNameWithExtention.substring(0, pos);
@@ -694,22 +816,9 @@ public class secondGUI extends JFrame{
 		      }
 		}
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		class ChartPanel extends JPanel {
 			private static final long serialVersionUID = 1L;
 
-			
 			private double[] values;
 
 			  private String[] names;
@@ -780,4 +889,21 @@ public class secondGUI extends JFrame{
 			    }
 			  }
 		}
+		
+		public static String firstWords(String input, int words) {
+	        for (int i = 0; i < input.length(); i++) {
+	            // When a space is encountered, reduce words remaining by 1.
+	            if (input.charAt(i) == ' ') {
+	                words--;
+	            }
+	            // If no more words remaining, return a substring.
+	            if (words == 0) {
+	                return input.substring(0, i);
+	            }
+	        }
+	        // Error case.
+	        return "";
+	    }
 }
+
+
