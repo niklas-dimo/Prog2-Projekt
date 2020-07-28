@@ -1,6 +1,10 @@
 package secondGUI;
 
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -10,6 +14,8 @@ import java.awt.GridLayout;
 import java.awt.CardLayout;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
@@ -21,6 +27,7 @@ import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -37,12 +44,13 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
-
 
 class RowFilterUtil {
     public static JTextField createRowFilter(JTable table) {
@@ -84,7 +92,7 @@ class RowFilterUtil {
 }
 
 
-public class secondGUI extends JFrame {
+public class secondGUI extends JFrame{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -95,7 +103,6 @@ public class secondGUI extends JFrame {
 	private JTextArea txtrWriteRecipeHere;
 	private static JTable table;
 	private JTable table_1;
-	
 
 	
 	public static void main(String[] args) {
@@ -104,7 +111,6 @@ public class secondGUI extends JFrame {
 			public void run() {
 				try {
 					secondGUI frame = new secondGUI();
-					frame.setVisible(true);
 					recipeListUpdate();
 					JOptionPane.showMessageDialog(null, "1. add shit \n 2. add more shit \n 3. add even more shit", "Instructions", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e) {
@@ -116,13 +122,14 @@ public class secondGUI extends JFrame {
 		}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" }) secondGUI() {
-		setTitle("RecipeManager");
-		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(320, 180, 1280, 720);
+		JFrame frame = new JFrame();
+		frame.setTitle("RecipeManager");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setBounds(320, 180, 1280, 720);
+		frame.setVisible(true);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+		frame.setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		JPanel panel = new JPanel();
@@ -404,7 +411,64 @@ public class secondGUI extends JFrame {
 		panel.add(panel_main_ingredients_diagram);
 		panel_main_ingredients_diagram.setLayout(new CardLayout(0, 0));
 		
+		
+		
+		JFrame secondFrame = new JFrame("2nd Window");
+		secondFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		secondFrame.setBounds(320, 180, 900, 480);
+		secondFrame.setLocationRelativeTo(panel);	
+
+		JPanel secondPanel = new JPanel();
+		secondPanel.setBackground(new Color(250, 240, 230));
+		secondPanel.setBorder(new MatteBorder(7, 7, 7, 7, (Color) new Color(0, 0, 128)));
+		secondPanel.setBounds(10, 11, 900, 480);
+		contentPane.add(panel);
+		secondPanel.setLayout(null);
+		
 		JButton btnNewButton_3 = new JButton("Show distribution");
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				double[] values = new double[3];
+			    String[] names = new String[3];
+			    values[0] = 1;
+			    names[0] = "Item 1";
+
+			    values[1] = 2;
+			    names[1] = "Item 2";
+
+			    values[2] = 4;
+			    names[2] = "Item 3";
+
+			    secondFrame.getContentPane().add(new ChartPanel(values, names, "title"));
+
+				secondFrame.setVisible(true);
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			}
+		});
 		panel_main_ingredients_diagram.add(btnNewButton_3, "name_39671767661000");
 		
 		JPanel panel_ingredient_add = new JPanel();
@@ -628,5 +692,92 @@ public class secondGUI extends JFrame {
 						 model3.addRow(new String[] {fileName});
 		        	}
 		      }
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		class ChartPanel extends JPanel {
+			private static final long serialVersionUID = 1L;
+
+			
+			private double[] values;
+
+			  private String[] names;
+
+			  private String title;
+
+			  public ChartPanel(double[] v, String[] n, String t) {
+			    names = n;
+			    values = v;
+			    title = t;
+			  }
+
+			  public void paintComponent(Graphics g) {
+			    super.paintComponent(g);
+			    if (values == null || values.length == 0)
+			      return;
+			    double minValue = 0;
+			    double maxValue = 0;
+			    for (int i = 0; i < values.length; i++) {
+			      if (minValue > values[i])
+			        minValue = values[i];
+			      if (maxValue < values[i])
+			        maxValue = values[i];
+			    }
+
+			    Dimension d = getSize();
+			    int clientWidth = d.width;
+			    int clientHeight = d.height;
+			    int barWidth = clientWidth / values.length;
+
+			    Font titleFont = new Font("SansSerif", Font.BOLD, 20);
+			    FontMetrics titleFontMetrics = g.getFontMetrics(titleFont);
+			    Font labelFont = new Font("SansSerif", Font.PLAIN, 10);
+			    FontMetrics labelFontMetrics = g.getFontMetrics(labelFont);
+
+			    int titleWidth = titleFontMetrics.stringWidth(title);
+			    int y = titleFontMetrics.getAscent();
+			    int x = (clientWidth - titleWidth) / 2;
+			    g.setFont(titleFont);
+			    g.drawString(title, x, y);
+
+			    int top = titleFontMetrics.getHeight();
+			    int bottom = labelFontMetrics.getHeight();
+			    if (maxValue == minValue)
+			      return;
+			    double scale = (clientHeight - top - bottom) / (maxValue - minValue);
+			    y = clientHeight - labelFontMetrics.getDescent();
+			    g.setFont(labelFont);
+
+			    for (int i = 0; i < values.length; i++) {
+			      int valueX = i * barWidth + 1;
+			      int valueY = top;
+			      int height = (int) (values[i] * scale);
+			      if (values[i] >= 0)
+			        valueY += (int) ((maxValue - values[i]) * scale);
+			      else {
+			        valueY += (int) (maxValue * scale);
+			        height = -height;
+			      }
+			      
+			      g.setColor(new Color(51, 153, 255));
+			      g.fillRect(valueX, valueY, barWidth - 2, height);
+			      g.setColor(Color.black);
+			      g.drawRect(valueX, valueY, barWidth - 2, height);
+			      int labelWidth = labelFontMetrics.stringWidth(names[i]);
+			      x = i * barWidth + (barWidth - labelWidth) / 2;
+			      g.drawString(names[i], x, y);
+			    }
+			  }
 		}
 }
