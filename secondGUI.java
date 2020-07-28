@@ -1,30 +1,32 @@
 package secondGUI;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.CardLayout;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JTextField;
-import javax.swing.BoxLayout;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextArea;
 import java.awt.event.ActionListener;
@@ -41,6 +43,47 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
 
+
+class RowFilterUtil {
+    public static JTextField createRowFilter(JTable table) {
+        RowSorter<? extends TableModel> rs = table.getRowSorter();
+        if (rs == null) {
+            table.setAutoCreateRowSorter(true);
+            rs = table.getRowSorter();
+        }
+        TableRowSorter<? extends TableModel> rowSorter =
+                (rs instanceof TableRowSorter) ? (TableRowSorter<? extends TableModel>) rs : null;
+        if (rowSorter == null) {
+            throw new RuntimeException("Cannot find appropriate rowSorter: " + rs);
+        }
+        final JTextField tf = new JTextField(15);
+        tf.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update(e);
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                update(e);
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update(e);
+            }
+            private void update(DocumentEvent e) {
+                String text = tf.getText();
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+        });
+        return tf;
+    }
+}
+
+
 public class secondGUI extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -53,6 +96,8 @@ public class secondGUI extends JFrame {
 	private static JTable table;
 	private JTable table_1;
 	
+
+	
 	public static void main(String[] args) {
 		
 		EventQueue.invokeLater(new Runnable() {
@@ -61,10 +106,12 @@ public class secondGUI extends JFrame {
 					secondGUI frame = new secondGUI();
 					frame.setVisible(true);
 					recipeListUpdate();
+					JOptionPane.showMessageDialog(null, "1. add shit \n 2. add more shit \n 3. add even more shit", "Instructions", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
+
 		});
 		}
 
@@ -175,8 +222,8 @@ public class secondGUI extends JFrame {
 		panel.add(panel_search);
 		panel_search.setLayout(new GridLayout(1, 0, 0, 0));
 		
-		txtSearchForRecipe = new JTextField();
-		txtSearchForRecipe.setText("Search for recipe name");
+		JTextField txtSearchForRecipe = RowFilterUtil.createRowFilter(table);
+		txtSearchForRecipe.setText("");
 		txtSearchForRecipe.setToolTipText("");
 		panel_search.add(txtSearchForRecipe);
 		txtSearchForRecipe.setColumns(10);
@@ -226,31 +273,36 @@ public class secondGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				
 			    try {
-				
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.addRow(new Object[] {txtEnterRecipeName.getText()});
-				
+
 				String recipeText = txtrWriteRecipeHere.getText();
 				
 				File file = new File(txtEnterRecipeName.getText() + ".txt");
 		        file.setWritable(true);
 		        file.setReadable(true);
 				
+		        if(file.exists() == false) {
 			    FileWriter fw = new FileWriter(file);
 			    System.out.println(file.getAbsoluteFile());
 			    
 			    String recipeFullText = recipeText;
 			    fw.write(recipeFullText);
-	    	
-			    	JOptionPane.showMessageDialog(null, "Recipe successfully added");
-					fw.close();
+			    fw.close();
+			    
+	    		DefaultTableModel model = (DefaultTableModel) table.getModel();
+				model.addRow(new Object[] {txtEnterRecipeName.getText()});
+				
+			    JOptionPane.showMessageDialog(null, "Recipe successfully added");
+		        }
+		        
+		        else {
+		        	JOptionPane.showMessageDialog(null, "Recipe with this name already exists");
+		        }
 				} 
 			    catch (IOException e) {
 					e.printStackTrace();
 				}
 			    
-			    table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));
-			    
+			    table_1.setModel(new DefaultTableModel(null, new String[] {"Ingredient", "Amount", "Unit"} ));			    
 			    txtEnterRecipeName.setText("Enter recipe name");
 			    txtrWriteRecipeHere.setText("Write recipe here");
 				}
@@ -362,7 +414,7 @@ public class secondGUI extends JFrame {
 		
 		JButton btnNewButton_4 = new JButton("add");
 		btnNewButton_4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e) {	
 				
 				DefaultTableModel model2 = (DefaultTableModel) table_1.getModel();
 				model2.addRow(new Object[] {txtEnterIngredientName.getText(), txtEnterIngredientAmount.getText(), comboBox.getSelectedItem() });				
@@ -376,6 +428,7 @@ public class secondGUI extends JFrame {
 
 				
 				try {
+										
 					FileWriter fw = new FileWriter(file3);
 					BufferedWriter bw = new BufferedWriter(fw);
 					
@@ -390,7 +443,8 @@ public class secondGUI extends JFrame {
 					
 					bw.close();
 					fw.close();
-					
+									
+					JOptionPane.showMessageDialog(null, "Ingredients successfully added");
 					
 				} catch (IOException e1) {
 					
@@ -542,7 +596,6 @@ public class secondGUI extends JFrame {
 		panel_change.add(btnChangeInputs, "name_178572106133400");
 	}
 		
-		
 		public static void recipeListUpdate() {
 				Path currentRelativePath = Paths.get("");
 				String s = currentRelativePath.toAbsolutePath().toString();
@@ -576,5 +629,4 @@ public class secondGUI extends JFrame {
 		        	}
 		      }
 		}
-}	
-
+}
